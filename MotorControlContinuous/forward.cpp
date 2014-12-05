@@ -74,11 +74,12 @@ public:
     while(nh_.ok()){
 
       std::cin.getline(cmd, 50);
-      if(cmd[0]!='x')
+
+      /*if(cmd[0]!='x'||cmd[0]!='')
       {
         std::cout << "unknown command:" << cmd << "\n";
         continue;
-      }
+      }*/
 
       base_cmd.linear.x = base_cmd.linear.y = base_cmd.angular.z = 0;  
  
