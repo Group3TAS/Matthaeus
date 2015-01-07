@@ -1,0 +1,51 @@
+          Cell 01 - Address: E8:39:35:F5:AC:F2
+                    ESSID:"eduroam"
+                    Signal level=84/100  
+          Cell 02 - Address: 58:6D:8F:02:B7:DC
+                    ESSID:"dd-wrt"
+                    Signal level=70/100  
+          Cell 03 - Address: 1A:E7:70:62:F8:A6
+                    ESSID:"bmwlaptop"
+                    Signal level=58/100  
+          Cell 04 - Address: 00:0F:61:53:E6:B0
+                    ESSID:"lrz"
+                    Signal level=74/100  
+          Cell 05 - Address: 00:0F:61:53:E6:B2
+                    ESSID:"eduroam"
+                    Signal level=76/100  
+          Cell 06 - Address: 00:0F:61:53:E6:B3
+                    ESSID:"ap01-3b5"
+                    Signal level=74/100  
+          Cell 07 - Address: 00:0F:61:53:E6:B4
+                    ESSID:"lsr"
+                    Signal level=74/100  
+          Cell 08 - Address: 00:0F:61:53:E6:B5
+                    ESSID:"mwn-events"
+                    Signal level=74/100  
+          Cell 09 - Address: 00:0F:61:51:EE:C0
+                    ESSID:"lrz"
+                    Signal level=70/100  
+          Cell 10 - Address: 00:0F:61:51:EE:C2
+                    ESSID:"mwn-events"
+                    Signal level=72/100  
+          Cell 11 - Address: 00:0F:61:51:EE:C3
+                    ESSID:"eduroam"
+                    Signal level=72/100  
+          Cell 12 - Address: 00:0F:61:51:EE:C4
+                    ESSID:"ap01-2b5"
+                    Signal level=60/100  
+          Cell 13 - Address: 00:03:52:5B:8C:A5
+                    ESSID:"mwn-events"
+                    Signal level=56/100  
+          Cell 14 - Address: 00:03:52:5B:8C:A0
+                    ESSID:"lrz"
+                    Signal level=68/100  
+          Cell 15 - Address: 00:03:52:5B:8C:A4
+                    ESSID:"ap02-3b5"
+                    Signal level=60/100  
+          Cell 16 - Address: E8:39:35:F5:FC:70
+                    ESSID:"mwn-events"
+                    Signal level=100/100  
+          Cell 17 - Address: E8:39:35:F5:FC:71
+                    ESSID:"lrz"
+                    Signal level=100/100  

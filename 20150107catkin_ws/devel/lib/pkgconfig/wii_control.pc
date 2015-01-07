@@ -1,0 +1,8 @@
+prefix=/home/tas_group_03/catkin_ws/devel
+
+Name: wii_control
+Description: Description of wii_control
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/tas_group_03/catkin_ws/devel/lib 
+Requires: 
