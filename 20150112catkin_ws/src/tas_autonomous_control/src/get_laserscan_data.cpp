@@ -27,8 +27,9 @@ public:
     nh_ = nh;
     }
     
-  int CheckForCollision(vector<float> data,int length){
+  int CheckForCollision(vector<float> data){
   
+    int length=data.size();
     int i=0;
     int j=0;
     int flag=0; //indicates collision
@@ -69,7 +70,7 @@ public:
     vector<float> data = scan->ranges;
     int length=data.size();
     
-    int Collision=CheckForCollision(data,length);
+    int Collision=CheckForCollision(data);
     //write laserscan data to file
     laserscan_data_write(data,length);
   }
