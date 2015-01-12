@@ -21,7 +21,7 @@ public:
     nh_ = nh;
     }
 
-  void PWMCallback(const geometry_msgs::Vector3::&servo)
+  void PWMCallback(const geometry_msgs::Vector3::ConstPtr&servo)
   {    
 //get current time
   time_t t;
@@ -30,8 +30,8 @@ public:
   //read control pwm signals
   int speed;
   int angle;
-  speed=servo->control_servo.x;
-  angle=servo->control_servo.y;
+  speed=servo->x;
+  angle=servo->y;
     
     pwm_data_write(t,speed,angle); 
   }
