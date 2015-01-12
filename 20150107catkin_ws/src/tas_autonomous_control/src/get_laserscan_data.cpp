@@ -20,6 +20,10 @@ private:
   geometry_msgs::Twist base_cmd;
   
 public:
+  dynamics_control(ros::NodeHandle &nh)
+  {
+    nh_ = nh;
+    }
 
   void laserCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
   {    
@@ -40,7 +44,8 @@ int main(int argc, char** argv)
   //init the ROS node
   ros::init(argc, argv, "get_laserscan_data");
   ros::NodeHandle nh;
-  ros::Subscriber laser_sub = nh.subscribe("scan", 1000, &dynamics_control::laserCallback);
+  dynamics_control readlaser(nh);
+  ros::Subscriber laser_sub = nh.subscribe("scan", 1000, &dynamics_control::laserCallback,&readlaser);
   ros::spin();
 
 }

@@ -16,6 +16,10 @@ private:
   geometry_msgs::Twist base_cmd;
   
 public:
+  dynamics_control(ros::NodeHandle &nh)
+  {
+    nh_ = nh;
+    }
 
   void PWMCallback(const geometry_msgs::Vector3::&servo)
   {    
@@ -36,10 +40,12 @@ public:
 
 int main(int argc, char** argv)
 {
+
   //init the ROS node
   ros::init(argc, argv, "get_control_signals");
   ros::NodeHandle nh;
-  ros::Subscriber pwm_signals = nh.subscribe("servo", 1000, &dynamics_control::PWMCallback);
+  dynamics_control readpwm(nh);
+  ros::Subscriber pwm_signals = nh.subscribe("servo", 1000, &dynamics_control::PWMCallback,&readpwm);
   ros::spin();
 
 }
