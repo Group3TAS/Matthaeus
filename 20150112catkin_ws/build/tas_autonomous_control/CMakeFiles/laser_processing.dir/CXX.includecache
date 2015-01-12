@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/tas_group_03/catkin_ws/src/tas_autonomous_control/src/laser_processing.cpp
+laser_processing.h
+/home/tas_group_03/catkin_ws/src/tas_autonomous_control/src/laser_processing.h
+vector
+-
+
+/home/tas_group_03/catkin_ws/src/tas_autonomous_control/src/laser_processing.h
+laser_processing.h
+/home/tas_group_03/catkin_ws/src/tas_autonomous_control/src/laser_processing.h
+vector
+-
+

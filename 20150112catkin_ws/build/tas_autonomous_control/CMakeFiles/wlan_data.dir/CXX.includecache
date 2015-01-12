@@ -1,0 +1,32 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/tas_group_03/catkin_ws/src/tas_autonomous_control/src/wlan_data.cpp
+wlan_data.h
+/home/tas_group_03/catkin_ws/src/tas_autonomous_control/src/wlan_data.h
+sstream
+-
+
+/home/tas_group_03/catkin_ws/src/tas_autonomous_control/src/wlan_data.h
+wlan_data.h
+/home/tas_group_03/catkin_ws/src/tas_autonomous_control/src/wlan_data.h
+string
+-
+iostream
+-
+fstream
+-
+vector
+-
+ios
+-
+cstdio
+-
+sstream
+-
+
