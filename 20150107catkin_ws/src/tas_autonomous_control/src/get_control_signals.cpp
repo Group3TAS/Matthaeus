@@ -1,10 +1,8 @@
 #include <iostream>
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
-#include <sensor_msgs/LaserScan.h>
-#include <vector>
-#include <geometry_msgs/PoseWithCovarianceStamped.h>
-#include "process_laserscan_data.h"
+#include "process_pwm_signals.h"
+#include <geometry_msgs/Vector3.h>
 
 using std::vector;
 using std::cout;
@@ -19,11 +17,17 @@ private:
   
 public:
 
-  void PWMCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
+  void PWMCallback(const geometry_msgs::Vector3::&servo)
   {    
 //get current time
   time_t t;
   t=time(0);
+  
+  //read control pwm signals
+  int speed;
+  int angle;
+  speed=servo->control_servo.x;
+  angle=servo->control_servo.y;
     
     pwm_data_write(t,speed,angle); 
   }
@@ -35,7 +39,7 @@ int main(int argc, char** argv)
   //init the ROS node
   ros::init(argc, argv, "get_control_signals");
   ros::NodeHandle nh;
-  ros::Subscriber pwm_signals = nh.subscribe("scan", 1000, &dynamics_control::PWMCallback);
+  ros::Subscriber pwm_signals = nh.subscribe("servo", 1000, &dynamics_control::PWMCallback);
   ros::spin();
 
 }
