@@ -9,8 +9,7 @@
 #include <geometry_msgs/Twist.h>
 
 #define PI                     3.14159265
-#define CAR_LENGTH              0.355
-#define SCALE_FAKTOR_STEERING   500
+#define CAR_LENGTH              0.355            
 
 class control
 {

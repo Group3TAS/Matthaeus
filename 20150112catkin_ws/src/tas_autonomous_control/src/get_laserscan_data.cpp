@@ -33,8 +33,8 @@ public:
     int i=0;
     int j=0;
     int flag=0; //indicates collision
-    float d_min=0.2; //minimum distance to an obstacle
-    float b=0.2; //width of the car 
+    float d_min=0.25; //minimum distance to an obstacle
+    float b=0.5; //width of the car 
     float phi=atan(2.0*d_min/b);
     float p=(phi/PI)*length;
     int p2=ceil(p);
@@ -71,6 +71,7 @@ public:
     int length=data.size();
     
     int Collision=CheckForCollision(data);
+    cout<<Collision<<endl;
     //write laserscan data to file
     laserscan_data_write(data,length);
   }

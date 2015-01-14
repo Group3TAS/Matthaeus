@@ -40,6 +40,6 @@ void laserscan_data_write(vector<float> data, int length)
       }
       
       log <<  output << endl;
-      cout << output << endl;
+      //cout << output << endl;
 }
 
