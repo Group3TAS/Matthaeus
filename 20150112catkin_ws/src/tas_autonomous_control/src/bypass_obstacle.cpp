@@ -4,7 +4,7 @@
 #include <sensor_msgs/LaserScan.h>
 #include <vector>
 #include "process_laserscan_data.h"
-#include "control.h"
+#include "control/control.h"
 #include <math.h> 
 #include <sys/time.h>
 #include <unistd.h>
@@ -18,12 +18,9 @@ class BypassObstacle
 private:
   ros::NodeHandle nh_;
   ros::Publisher cmd_vel_pub_;
-  ros::Publisher cmd_shutdown_;
   ros::Subscriber laser_sub;
   ros::Subscriber pose_sub;
   geometry_msgs::Twist base_cmd;
-  std_msgs::Bool shutdown;
-  int iter=0;
 
   
 public:
@@ -34,11 +31,16 @@ public:
     
     //set up the publisher for the cmd_vel topic
      cmd_vel_pub_ = nh_.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
-     cmd_shutdown_ = nh_.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
+     //set up the subscriber for the scan topic
+     laser_sub = nh_.subscribe("scan", 1000, &BypassObstacle::laserCallback,&bypass);
     }
-    
+  
+   geometry_msgs::Vector3 data;
    
-  char CheckForCollision(vector<float> data){ //this function process laser data and checks for collisions
+   char Collision='x';
+    
+  //this function process laser data and checks for collisions
+  char CheckForCollision(vector<float> data){
   
     int length=data.size();
     int i=0;
@@ -105,25 +107,154 @@ public:
       return 'm';
     }
   } 
-
-  void Bypass(){
   
-     
-    
+  //this function tries to evade the obstacle
+  void Bypass(CharFlag){
+  
+      base_cmd.linear.x = base_cmd.linear.y = base_cmd.angular.z = 0;  
+ 
+      //standstill
+	  base_cmd.linear.x = 1550;
+   	  base_cmd.angular.z = 0;
+   	  
+      //publish the assembled command
+      cmd_vel_pub_.publish(base_cmd);
+      
+      //wait 3 seconds (the obstacle could be removed)
+      sleep(3);
+      Collision=CheckForCollision(data);
+      
+      //check whether the road is free again
+      if (Collision=='x'){
+        return; //the obstacle has moved on, the car continues in its normal automatic mode
+      }
+      
+      //drive backwards
+	  base_cmd.linear.x = 1365;
+   	  base_cmd.angular.z = 1;
+   	  
+      //publish the assembled command
+      cmd_vel_pub_.publish(base_cmd);
+      
+      //start to evade obstacle
+      if(CharFlag=='r'||CharFlag=='m'){
+        
+        //get current time
+        time_t t;
+        time_t t0;
+        t0=time(0);
+        t=time(0);
+        
+        while(t-t0<2){
+        
+          //check whether the road is free, if a new obstacle occurs the function Bypass is called recursively       
+          Collision=CheckForCollision(data);
+          
+          if (Collision!='x'){
+            Bypass(Collision);
+            return;
+          }
+          
+          //move to the right side
+	      base_cmd.linear.x = 1550;
+   	      base_cmd.angular.z = -20;
+   	  
+          //publish the assembled command
+          cmd_vel_pub_.publish(base_cmd);
+          
+          //update time
+          t=time(0);
+        
+         }
+         
+        while(t-t0>=2 && t-t0<4){
+        
+          //check whether the road is free, if a new obstacle occurs the function Bypass is called recursively       
+          Collision=CheckForCollision(data);
+          
+          if (Collision!='x'){
+            Bypass(Collision);
+            return;
+          }
+          
+          //move to the left side
+	      base_cmd.linear.x = 1550;
+   	      base_cmd.angular.z = 20;
+   	  
+          //publish the assembled command
+          cmd_vel_pub_.publish(base_cmd);
+          
+          //update time
+          t=time(0);
+        
+         }
+        
+      }
+      
+      if(CharFlag=='l'){
+        
+        //get current time
+        time_t t;
+        time_t t0;
+        t0=time(0);
+        t=time(0);
+        
+        while(t-t0<2){
+                
+          //check whether the road is free, if a new obstacle occurs the function Bypass is called recursively       
+          Collision=CheckForCollision(data);
+          
+          if (Collision!='x'){
+            Bypass(Collision);
+            return;
+          }
+          
+          //move to the left side
+	      base_cmd.linear.x = 1550;
+   	      base_cmd.angular.z = 20;
+   	  
+          //publish the assembled command
+          cmd_vel_pub_.publish(base_cmd);
+          
+          //update time
+          t=time(0);
+        
+         }
+         
+        while(t-t0>=2 && t-t0<4){      
+                
+          //check whether the road is free, if a new obstacle occurs the function Bypass is called recursively       
+          Collision=CheckForCollision(data);
+          
+          if (Collision!='x'){
+            Bypass(Collision);
+            return;
+          }
+          
+          //move to the right side
+	      base_cmd.linear.x = 1550;
+   	      base_cmd.angular.z = -20;
+   	  
+          //publish the assembled command
+          cmd_vel_pub_.publish(base_cmd);
+          
+          //update time
+          t=time(0);
+        
+         }
+        
+      }
+      
+      return;
   }
 
   void laserCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
   {    
 
     vector<float> data = scan->ranges;
-    int length=data.size();
-    
-    char Collision=CheckForCollision(data);
-    cout<<Collision<<endl;
     
     //write laserscan data to file
-    laserscan_data_write(data,length);
-    
+    //laserscan_data_write(data,length);
     
   }
 
@@ -132,10 +263,19 @@ public:
 int main(int argc, char** argv)
 {
   //init the ROS node
-  ros::init(argc, argv, "get_laserscan_data");
+  ros::init(argc, argv, "bypass_obstacle");
   ros::NodeHandle nh;
-  BypassObstacle bypass(nh);
-  ros::Subscriber laser_sub = nh.subscribe("scan", 1000, &BypassObstacle::laserCallback,&bypass);
+  BypassObstacle mypass(nh);
+  //ros::Subscriber laser_sub = nh.subscribe("scan", 1000, &BypassObstacle::laserCallback,&bypass);
+  mypass.Collision=mypass.CheckForCollision(mypass.data);//here we get the laserscan data and check for obstacles
+  cout<<mypass.Collision<<endl;
+
+  if (mypass.Collision!='x'){
+    Bypass(mypass.Collision);
+  }
+  
+  
   ros::spin();
+  return 0;
 
 }

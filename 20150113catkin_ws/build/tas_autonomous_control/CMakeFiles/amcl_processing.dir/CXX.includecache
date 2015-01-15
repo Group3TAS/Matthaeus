@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/tas_group_03/catkin_ws/src/tas_autonomous_control/src/amcl_processing.cpp
+amcl_processing.h
+/home/tas_group_03/catkin_ws/src/tas_autonomous_control/src/amcl_processing.h
+cmath
+-
+iostream
+-
+
+/home/tas_group_03/catkin_ws/src/tas_autonomous_control/src/amcl_processing.h
+vector
+-
+amcl_processing.h
+/home/tas_group_03/catkin_ws/src/tas_autonomous_control/src/amcl_processing.h
+

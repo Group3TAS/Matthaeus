@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/tas_group_03/catkin_ws/src/tas_autonomous_control/src/matrix_import.cpp
+matrix_import.h
+/home/tas_group_03/catkin_ws/src/tas_autonomous_control/src/matrix_import.h
+
+/home/tas_group_03/catkin_ws/src/tas_autonomous_control/src/matrix_import.h
+iostream
+-
+fstream
+-
+vector
+-
+string
+-
+stdlib.h
+-
+sstream
+-
+iterator
+-
+
