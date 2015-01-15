@@ -1,4 +1,5 @@
 #include <ros/ros.h>
+#include <iostream>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseArray.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
@@ -7,6 +8,7 @@
 #include <sensor_msgs/LaserScan.h>
 #include "matrix_import.h"
 #include <math.h>
+#include "control/control.h"
 
 using std::vector;
 using std::cout;
@@ -16,52 +18,88 @@ vector< vector<float> > policy_mat;
 ros::Publisher cmd_vel_pub_;
 vector<float> ranges;
 
-void laserCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
-{
-  ranges = scan->ranges;
-}
-
 char CheckForCollision(vector<float> data){ //this function process laser data and checks for collisions
   
     int length=data.size();
     int i=0;
     int j=0;
+    float theta=0;
     int flag=0; //indicates collision
     int direction=0; //indicates where the obstacle is located (left/right)
-    float d_min=0.25; //minimum distance to an obstacle
+    float d_min=0.6; //minimum distance to an obstacle
     float b=0.5; //width of the car 
-    float phi=atan(2.0*d_min/b);
-    float p=(phi/PI)*length;
-    int p2=ceil(p);
-    float data_relevant[2*p2+1];
-    float data_left[];
+    float phi=atan(b/(2*d_min));
+    float BypassAngle=phi=atan(1.5/(2*d_min));
     
-    for(i=0;i<=2*p2;i++){
-      data_relevant[i]=data[length/2-p2+i];
-    }
+    float p=(phi/PI)*length;
+    float p0=(BypassAngle/PI)*length;
+    int p2=ceil(p);
+    int pb=ceil(p0);
+    int pw=floor(2.0/9.0*length);
+    
+    float data_relevant[2*p2+1];
+    float left_wall[pw];
+    float right_wall[pw];
+    float data_bypass[2*pb+1];
     
     int counter=0; //counts how many measurement points imply a critical distance to an obstacle
     int leftside=0;
     int rightside=0;
+    int leftwall=0;
+    int rightwall=0;
+    int WallFlag=0;
     
-    for (j=0;j<=2*p2;j++){
-      
-      if (data_relevant[j]<=d_min){
+    for(i=0;i<=2*p2;i++){
+    
+      data_relevant[i]=data[length/2-p2+i];
+            
+      if (data_relevant[i]<=d_min){
         counter++;
       }
-      
-      if (data_relevant[j]<=d_min && j<p2){
-        leftside++;
-      }
-            
-      if (data_relevant[j]<=d_min && j>p2){
-        rightside++;
-      }      
-      
     }
     
+    for(i=0;i<=2*pb;i++){
+      data_bypass[i]=data[length/2-p2+i];
+      
+      if (i<pb){
+        rightside=rightside+data_bypass[i];
+      } 
+      
+      if (i>pb){
+        leftside=leftside+data_bypass[i];
+      }
+    }
+    
+    for(i=0;i<pw;i++){
+    
+      left_wall[i]=data[length-1-i];
+      right_wall[i]=data[i];
+      
+      theta=atan(float(i)/float(pw-1));
+      
+      if(right_wall[i]<0.3/cos(theta*PI/180)){
+        rightwall++;
+      }
+      
+      if(left_wall[i]<0.3/cos(theta*PI/180)){
+        leftwall++;
+      }
+    }
+    
+    if (rightwall>2){
+      WallFlag=1; //the car is too close to the wall (right hand side)
+    }    
+    
+    if (leftwall>2){
+      WallFlag=-1; ////the car is too close to the wall (left hand side)
+    }     
+          
     if(leftside>rightside){
       direction=-1;
+    }
+    
+    if(leftside==rightside){
+      direction=0;
     }
     
     if(leftside<rightside){
@@ -69,14 +107,30 @@ char CheckForCollision(vector<float> data){ //this function process laser data a
     }
     
     //if the minimum distance is undercut a critical amount of times, a near obstacle is assumed
-    if (counter>3){
+    if (counter>2){
       flag=1; //it is very likely that an obstacle is right in front of the car
     }
     
-    if(flag==0){
+    if(flag==0 && WallFlag==0){
       return 'x';
     }
     
+    if(flag==0 && WallFlag==1){
+      return 'a'; //wall on the right side (no obstacle)
+    }
+    
+    if(flag==0 && WallFlag==-1){
+      return 'b'; //wall on the left side (no obstacle)
+    }
+    
+    if(flag==1 && WallFlag==-1){
+      return 'r';
+    }
+        
+    if(flag==1 && WallFlag==1){
+      return 'l';
+    }
+
     if(flag==1 && direction==-1){
       return 'l';
     }
@@ -90,13 +144,18 @@ char CheckForCollision(vector<float> data){ //this function process laser data a
     }
   } 
 
+void laserCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
+{
+  ranges = scan->ranges;
+}
+
 void nextCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg){
   //ROS_INFO("X Coordinate: %f", msg->pose.pose.position.x);
   //ROS_INFO("Y Coordinate: %f", msg->pose.pose.position.y);
 
   geometry_msgs::Twist base_cmd;
-  int fastspeed=1575;
-  int slowspeed=1550;
+  int fastspeed=1580;
+  int slowspeed=1553;
 
   float DX=0.05;
   float DY=0.05;
@@ -157,7 +216,7 @@ void nextCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg)
 
   float radius;
 
-
+    int maxangle=20;
 
 
   //speed =slowspeed;
@@ -201,36 +260,68 @@ void nextCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg)
   maty=yi-1;
   matx=xi-1+(thetai-1)*nx;
 
-  //cout << " matx " << matx<< " maty " << maty << " xi " << xi << " yi " << yi << " thetai " << thetai << endl;
-  //cout << "speed"<< speed << " x " << x << " y " << y << " theta " << theta << endl;
+  cout << " matx " << matx<< " maty " << maty << " xi " << xi << " yi " << yi << " thetai " << thetai << endl;
+  cout << "speed"<< speed << " x " << x << " y " << y << " theta " << theta << endl;
 
   radius=policy_mat[matx][maty];
 
   if(radius<-0.1)
   {
       //rechts
-      //cout << "rechts" << endl;
-      base_cmd.angular.z = -30;
+      cout << "rechts" << endl;
+      base_cmd.angular.z = -maxangle;
   }
   else
   {
       if(radius>0.1)
       {
           //links
-          //cout << "links" << endl;
-          base_cmd.angular.z = 30;
+          cout << "links" << endl;
+          base_cmd.angular.z = maxangle;
       }
       else
       {
           //gerade
-          //cout << "gerade" << endl;
+          cout << "gerade" << endl;
           base_cmd.angular.z = 0;
       }
   }
   
-  char Collision=CheckForCollision(ranges);
+  //check for obstacles and adapt control signals
+    char Collision=CheckForCollision(ranges);
+    cout<<Collision<<endl;
+    
+    switch (Collision)
+    {
+    case 'x':
+      //Aktion1
+      break;
+      
+    case 'l':
+      //Aktion2
+      break;
+      
+    case 'r':
+      //Aktion3
+      break;
+                  
+    case 'm': //treated like 'r'
+      //Aktion4
+      break;
+      
+    case 'a':
+      //Aktion5
+      break;
+            
+    case 'b':
+      //Aktion6
+      break;
+      
+    default:
+      cout<<"CheckForCollision failed"<<endl;
+    }
   
-  cout<<Collision<<endl;
+  
   
   base_cmd.linear.x = speed;
   cmd_vel_pub_.publish(base_cmd);
