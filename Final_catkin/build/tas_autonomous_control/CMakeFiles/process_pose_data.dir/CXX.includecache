@@ -1,0 +1,32 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/tas_group_03/catkin_ws/src/tas_autonomous_control/src/process_pose_data.cpp
+process_pose_data.h
+/home/tas_group_03/catkin_ws/src/tas_autonomous_control/src/process_pose_data.h
+sstream
+-
+
+/home/tas_group_03/catkin_ws/src/tas_autonomous_control/src/process_pose_data.h
+process_pose_data.h
+/home/tas_group_03/catkin_ws/src/tas_autonomous_control/src/process_pose_data.h
+string
+-
+iostream
+-
+fstream
+-
+vector
+-
+ios
+-
+cstdio
+-
+sstream
+-
+

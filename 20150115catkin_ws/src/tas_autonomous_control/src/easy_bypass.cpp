@@ -170,20 +170,20 @@ public:
     int flag=0; //indicates collision
     int direction=0; //indicates where the obstacle is located (left/right)
     float d_min=0.5; //minimum distance to an obstacle
-    float b=0.5; //width of the car 
+    float b=1; //width of the car 
     float phi=atan(b/(2*d_min));
-    float BypassAngle=phi=atan(1.5/(2*d_min));
+    //float BypassAngle=phi=atan(1.5/(2*d_min));
     
     float p=(phi/PI)*length;
-    float p0=(BypassAngle/PI)*length;
+    //float p0=(BypassAngle/PI)*length;
     int p2=ceil(p);
-    int pb=ceil(p0);
+    //int pb=ceil(p0);
     int pw=floor(2.0/9.0*length);
     
     float data_relevant[2*p2+1];
     float left_wall[pw];
     float right_wall[pw];
-    float data_bypass[2*pb+1];
+    //float data_bypass[2*pb+1];
     
     int counter=0; //counts how many measurement points imply a critical distance to an obstacle
     int leftside=0;
@@ -199,9 +199,17 @@ public:
       if (data_relevant[i]<=d_min){
         counter++;
       }
+      
+      if (data_relevant[i]<=d_min && i<p2){
+        rightside++;
+      }
+                 
+      if (data_relevant[i]<=d_min && i>p2){
+        leftside++;
+      }
     }
     
-    for(i=0;i<=2*pb;i++){
+    /*for(i=0;i<=2*pb;i++){
       data_bypass[i]=data[length/2-p2+i];
       
       if (i<pb){
@@ -211,7 +219,7 @@ public:
       if (i>pb){
         leftside=leftside+data_bypass[i];
       }
-    }
+    }*/
     
     for(i=0;i<pw;i++){
     
@@ -220,11 +228,11 @@ public:
       
       theta=atan(float(i)/float(pw-1));
       
-      if(right_wall[i]<0.3/cos(theta*PI/180)){
+      if(right_wall[i]<0.4/cos(theta*PI/180)){
         rightwall++;
       }
       
-      if(left_wall[i]<0.3/cos(theta*PI/180)){
+      if(left_wall[i]<0.4/cos(theta*PI/180)){
         leftwall++;
       }
     }
@@ -237,7 +245,7 @@ public:
       WallFlag=-1; ////the car is too close to the wall (left hand side)
     }     
           
-    if(leftside>rightside){
+    if(leftside<rightside){
       direction=-1;
     }
     
@@ -245,7 +253,7 @@ public:
       direction=0;
     }
     
-    if(leftside<rightside){
+    if(leftside>rightside){
       direction=1;
     }
     
@@ -295,21 +303,48 @@ public:
 
     //move forward
     base_cmd.linear.x = 1550;
-    base_cmd.angular.z = 0;
-
-    //publish the assembled command
-    cmd_vel_pub_.publish(base_cmd);
-    //cout<<"forward"<<endl;
+    base_cmd.angular.z = 3;
     
+    //check for obstacles and adapt control signals
+    int evadeangle=30;
+    int wallangle=20;
     char Collision=CheckForCollision(data);
     cout<<Collision<<endl;
-    //write laserscan data to file
-    //laserscan_data_write(data,length);
-        
-    if (Collision!='x'){
-        BlindBypass(Collision);
-        //sleep(4);
-  }
+    
+    
+    switch (Collision)
+    {
+    case 'x':
+      //nothing to do here
+      break;
+      
+    case 'l':
+      base_cmd.angular.z=base_cmd.angular.z+evadeangle;
+      break;
+      
+    case 'r':
+      base_cmd.angular.z=base_cmd.angular.z-evadeangle;
+      break;
+                  
+    case 'm': //treated like 'r'
+      base_cmd.angular.z=base_cmd.angular.z-evadeangle;
+      break;
+      
+    case 'a':
+      base_cmd.angular.z=base_cmd.angular.z+wallangle;
+      break;
+            
+    case 'b':
+      base_cmd.angular.z=base_cmd.angular.z-wallangle;
+      break;
+      
+    default:
+      cout<<"CheckForCollision failed"<<endl;
+    }
+    
+    //publish the assembled command
+    cmd_vel_pub_.publish(base_cmd);
+
   }
 
 };

@@ -20,27 +20,23 @@ vector<float> ranges;
 
 char CheckForCollision(vector<float> data){ //this function process laser data and checks for collisions
   
-    int length=data.size();
-    int i=0;
-    int j=0;
+    int length=data.size(); //length of the laser data vector
+    int i=0; //loop iterator
     float theta=0;
     int flag=0; //indicates collision
     int direction=0; //indicates where the obstacle is located (left/right)
-    float d_min=0.6; //minimum distance to an obstacle
-    float b=0.5; //width of the car 
-    float phi=atan(b/(2*d_min));
-    float BypassAngle=phi=atan(1.5/(2*d_min));
+    float d_min=0.5; //minimum desired distance to an obstacle. 
+    float b=1; //width in which the laserscanner looks for obstacles
+    float phi=atan(b/(2*d_min)); //2*phi is the angle corresponding to b;
     
-    float p=(phi/PI)*length;
-    float p0=(BypassAngle/PI)*length;
-    int p2=ceil(p);
-    int pb=ceil(p0);
+    float p=(phi/PI)*length; 
+    int p2=ceil(p); //make sure we get an integer
     int pw=floor(2.0/9.0*length);
     
-    float data_relevant[2*p2+1];
-    float left_wall[pw];
+    float data_relevant[2*p2+1]; //the data window to detect obstacles in front of the car
+    float left_wall[pw]; //the data window t
     float right_wall[pw];
-    float data_bypass[2*pb+1];
+    //float data_bypass[2*pb+1];
     
     int counter=0; //counts how many measurement points imply a critical distance to an obstacle
     int leftside=0;
@@ -56,9 +52,17 @@ char CheckForCollision(vector<float> data){ //this function process laser data a
       if (data_relevant[i]<=d_min){
         counter++;
       }
+      
+      if (data_relevant[i]<=d_min && i<p2){
+        rightside++;
+      }
+                 
+      if (data_relevant[i]<=d_min && i>p2){
+        leftside++;
+      }
     }
     
-    for(i=0;i<=2*pb;i++){
+    /*for(i=0;i<=2*pb;i++){
       data_bypass[i]=data[length/2-p2+i];
       
       if (i<pb){
@@ -68,7 +72,7 @@ char CheckForCollision(vector<float> data){ //this function process laser data a
       if (i>pb){
         leftside=leftside+data_bypass[i];
       }
-    }
+    }*/
     
     for(i=0;i<pw;i++){
     
@@ -77,11 +81,11 @@ char CheckForCollision(vector<float> data){ //this function process laser data a
       
       theta=atan(float(i)/float(pw-1));
       
-      if(right_wall[i]<0.3/cos(theta*PI/180)){
+      if(right_wall[i]<0.4/cos(theta*PI/180)){
         rightwall++;
       }
       
-      if(left_wall[i]<0.3/cos(theta*PI/180)){
+      if(left_wall[i]<0.4/cos(theta*PI/180)){
         leftwall++;
       }
     }
@@ -94,7 +98,7 @@ char CheckForCollision(vector<float> data){ //this function process laser data a
       WallFlag=-1; ////the car is too close to the wall (left hand side)
     }     
           
-    if(leftside>rightside){
+    if(leftside<rightside){
       direction=-1;
     }
     
@@ -102,7 +106,7 @@ char CheckForCollision(vector<float> data){ //this function process laser data a
       direction=0;
     }
     
-    if(leftside<rightside){
+    if(leftside>rightside){
       direction=1;
     }
     
@@ -144,6 +148,7 @@ char CheckForCollision(vector<float> data){ //this function process laser data a
     }
   } 
 
+
 void laserCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
 {
   ranges = scan->ranges;
@@ -154,8 +159,12 @@ void nextCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg)
   //ROS_INFO("Y Coordinate: %f", msg->pose.pose.position.y);
 
   geometry_msgs::Twist base_cmd;
-  int fastspeed=1580;
-  int slowspeed=1553;
+  int fastspeed=1600;
+  int slowspeed=1560;
+  
+  int maxangle=17;
+  int evadeangle=30;
+  int wallangle=15;
 
   float DX=0.05;
   float DY=0.05;
@@ -216,7 +225,7 @@ void nextCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg)
 
   float radius;
 
-    int maxangle=20;
+    
 
 
   //speed =slowspeed;
@@ -294,27 +303,27 @@ void nextCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg)
     switch (Collision)
     {
     case 'x':
-      //Aktion1
+      //nothing to do here
       break;
       
     case 'l':
-      //Aktion2
+      base_cmd.angular.z=base_cmd.angular.z+evadeangle;
       break;
       
     case 'r':
-      //Aktion3
+      base_cmd.angular.z=base_cmd.angular.z-evadeangle;
       break;
                   
     case 'm': //treated like 'r'
-      //Aktion4
+      base_cmd.angular.z=base_cmd.angular.z-evadeangle;
       break;
       
     case 'a':
-      //Aktion5
+      base_cmd.angular.z=base_cmd.angular.z+wallangle;
       break;
             
     case 'b':
-      //Aktion6
+      base_cmd.angular.z=base_cmd.angular.z-wallangle;
       break;
       
     default:
