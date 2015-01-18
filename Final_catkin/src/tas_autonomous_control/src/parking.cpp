@@ -25,7 +25,7 @@ using std::endl;
 class dynamics_control
 {
 private:
-  // Declaration of variables to be used wtihin the task.
+  // Declaration of variables to be used within the task.
   ros::NodeHandle nh_;
   ros::Publisher cmd_vel_pub_;
   ros::Subscriber laser_sub;
