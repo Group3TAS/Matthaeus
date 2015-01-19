@@ -1,3 +1,7 @@
+//The following node implements a subscriber to the laserscan data. Every time new data are retrieved,
+//a function is invoked, which writes the data to a text file. This node is utilized for test purposes
+//Author: Group03
+
 #include <iostream>
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
@@ -20,21 +24,19 @@ private:
   geometry_msgs::Twist base_cmd;
   
 public:
+//class constructor
   dynamics_control(ros::NodeHandle &nh)
   {
     nh_ = nh;
-    }
+  }
 
   void laserCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
   {    
-    /*vector<float>::size_type x;
-    vector<float> ranges;*/
-    
-    //float data[] = scan->ranges;
+    //retrieve new data from the laserscanner
     vector<float> data = scan->ranges;
-    int length=data.size();
     
-    laserscan_data_write(data,length);
+    //write data to file
+    laserscan_data_write(data);
   }
 
 };
@@ -44,7 +46,11 @@ int main(int argc, char** argv)
   //init the ROS node
   ros::init(argc, argv, "get_laserscan_data");
   ros::NodeHandle nh;
+  
+  //generate new object of class dynamics_control
   dynamics_control readlaser(nh);
+  
+  //subscribe to laserscanner
   ros::Subscriber laser_sub = nh.subscribe("scan", 1000, &dynamics_control::laserCallback,&readlaser);
   ros::spin();
 

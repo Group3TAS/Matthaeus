@@ -1,3 +1,6 @@
+//the following function writes position estimates to a text file
+//Author: Group03
+
 #include "process_pose_data.h"
 #include <sstream>
 
@@ -28,9 +31,9 @@ void position_data_write(float x_coord, float y_coord, int t)
 
   // The execution of writing manipulated data
       // The output variable is a semi-colon separated concatenation of the results. Each function extracts information
-      // from the vector pose_data_vec. output is then appended to the end of the pose_database.txt
+      // from the vector [x_coord y_coord t]. output is then appended to the end of the pose_database.txt
       // file.
       output = x_string.str() + ";" + y_string.str() + ";" + t_string.str();
-      cout << output << endl;
-      log <<  output << "\n";
+      cout << output << endl; //write to file
+      log <<  output << "\n"; //display results
 }

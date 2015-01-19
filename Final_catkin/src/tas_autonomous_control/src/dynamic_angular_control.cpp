@@ -1,3 +1,11 @@
+// This node implements two functions:
+// 1. It takes amcl_pose data, computes which policy entry corresponds to 
+// the current pose and reads the entry from the policy matrix.
+// 2. It implements the velocity regulator. Laserscan data is converted into velocity PWM sinals.
+// 
+// These results are forwarded to the easy_bypass node
+// Author: Group03
+
 #include <ros/ros.h>
 #include <iostream>
 #include <geometry_msgs/Pose.h>
@@ -18,20 +26,16 @@ vector< vector<float> > policy_mat;
 ros::Publisher cmd_vel_pub_;
 vector<float> ranges;
 
-
 void laserCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
 {
   ranges = scan->ranges;
 }
 
 void nextCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg){
-  //ROS_INFO("X Coordinate: %f", msg->pose.pose.position.x);
-  //ROS_INFO("Y Coordinate: %f", msg->pose.pose.position.y);
-
-  geometry_msgs::Twist base_cmd;
-  //int fastspeed=1600;
-  //int slowspeed=1555;
+  // this function implements the policy lookup
   
+  geometry_msgs::Twist base_cmd;
+
   int fastspeed=1600;
   int slowspeed=1555;
 
@@ -52,19 +56,19 @@ void nextCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg)
   float closedistance=0.4;
   float fardistance=1.5;
   int speed;
-  // Laser scanner
-
+///// This part is for the velocity regulation
+// first the minimum distance of the laser scan is computed
   vector<float>::size_type n , i;
   n = ranges.size();
   float mindistance=999999;
   for (i = 0; i!=n; i++)
     {
       if (ranges[i] < mindistance)
-    {
-        mindistance=ranges[i];
-     }
+      {
+          mindistance=ranges[i];
+      }
     }
-
+// this is then used to compute the velocity PWM signal
   if(mindistance<closedistance)
   {
       speed=slowspeed;
@@ -73,14 +77,13 @@ void nextCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg)
   {
       if(mindistance>fardistance)
       {
-          speed=fastspeed;
+        speed=fastspeed;
       }
       else
       {
-          speed=slowspeed+(fastspeed-slowspeed)*(mindistance-closedistance)/(fardistance-closedistance);
+        speed=slowspeed+(fastspeed-slowspeed)*(mindistance-closedistance)/(fardistance-closedistance);
       }
   }
-
 
   float x=msg->pose.pose.position.x;
   float y=msg->pose.pose.position.y;
@@ -98,17 +101,6 @@ void nextCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg)
 
   float radius;
 
-    
-
-
-  //speed =slowspeed;
-
-  //if(((x<21)&&(x>13))||((y<17)&&(y>10)))
-  //{
-  //    speed=fastspeed;
-  //}
-
-
   if(x<xstart)
       x=xstart+3*DX;
   if(x>25)
@@ -118,18 +110,15 @@ void nextCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg)
   if(y>22)
       y=22-3*DY;
 
-
   while(theta<0)
       theta=theta+2*3.14159265;
 
   while(theta>2*3.14159265)
       theta=theta-2*3.14159265;
 
-
   if(theta<=DTHETA/2||theta>=2*3.14159265-DTHETA/2)
   {
       thetai=1;
-
   }
   else
   {
@@ -169,17 +158,13 @@ void nextCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg)
       }
   }
     
-  
   base_cmd.linear.x = speed;
   cmd_vel_pub_.publish(base_cmd);
-
-
 }
 
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "dynamic_angular_control");
-  //cout << "testmain";
   ros::NodeHandle n;
 
   policy_mat = matrix_import("pol.txt");

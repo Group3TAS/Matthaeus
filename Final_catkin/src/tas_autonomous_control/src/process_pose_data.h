@@ -1,3 +1,5 @@
+//Author: Group03
+
 #ifndef PROCESS_POSE_DATA_H_GUARD
 #define PROCESS_POSE_DATA_H_GUARD
 

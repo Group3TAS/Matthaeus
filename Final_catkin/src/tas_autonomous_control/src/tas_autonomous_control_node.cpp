@@ -15,6 +15,7 @@ int main(int argc, char** argv)
         }
         else
         {
+            
             if(autonomous_control.control_Brake.data==1)
             {
                 autonomous_control.control_servo.x=1500;
