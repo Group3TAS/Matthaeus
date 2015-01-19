@@ -4,7 +4,10 @@
 // 2. It implements the velocity regulator. Laserscan data is converted into velocity PWM sinals.
 // 
 // These results are forwarded to the easy_bypass node
+<<<<<<< HEAD
 // Author: Group03
+=======
+>>>>>>> FETCH_HEAD
 
 #include <ros/ros.h>
 #include <iostream>

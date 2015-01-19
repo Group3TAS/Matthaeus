@@ -1,6 +1,21 @@
 #include "wlan_data.h"
 #include <sstream>
 
+/*
+
+Technik Autonomer Systeme
+
+17 January 2015
+
+Group 3
+
+This function is called in pose_data to append
+the current pose readings to the current WLAN
+sources' signal strengths and save it into a text
+file called "wlan_sources_database.txt".
+
+*/
+
 using std::cout;
 using std::cin;
 using std::endl;
@@ -9,6 +24,9 @@ using std::string;
 using std::ostringstream;
 using std::stringstream;
 
+// The following four subfunctions convert the
+// data readings retrieved from an Ubuntu command
+// into strings.
 string wlan_data::wlan_address(string& line)
 {
   string address ("Address: ");
@@ -53,6 +71,10 @@ string wlan_data::wlan_quality(string& line)
   return quality_data;
 }
 
+// This function is called in pose_data.  It takes the current coordinates, covariance matrix and orientation
+// of the car and the signal strengths of all readable WLAN sources and converts it into a semicolon
+// separated line of text, which is eventually appended to the previous readings.  It saves the data
+// into the file "wlan_sources_database.txt".
 void wlan_data_write(float x_coord, float y_coord,vector<float> cov_vec, vector<float> orient_vec)
 {
   // Convert cov_vec from type vector to type string

@@ -10,6 +10,19 @@
 #include <cstdio>
 #include <sstream>
 
+/*
+
+Technik Autonomer Systeme
+
+17 January 2015
+
+Group 3
+
+Header file for wlan_data function, which is 
+called in the program pose_data
+
+*/
+
 namespace wlan_data 
 {
   std::string wlan_address(std::string&);
